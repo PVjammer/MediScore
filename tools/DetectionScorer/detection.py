@@ -250,7 +250,7 @@ def plot_options(DM_list, configPlot, plotType, plotTitle, plotSubtitle, optOut)
     color = cycle(colors)
     lty = cycle(linestyles)
     mkr = cycle(markerstyles)
-    for i in range(len(DM_List)):
+    for i in range(len(DM_list)):
         new_curve_option = OrderedDict(Curve_opt)
         col = next(color)
         new_curve_option['color'] = col
@@ -289,3 +289,127 @@ def query_plot_options(DM_List, opts_list, plot_opts, selection, optOut, noNum):
                 str(dm_list.t_num) + ", NT#: " + str(dm_list.nt_num) + ")"
 
     return opts_list, plot_opts
+
+def score(req):
+    # the performers' result directory
+    if '/' not in req.outRoot:
+        root_path = '.'
+        file_suffix = req.outRoot
+    else:
+        root_path, file_suffix = req.outRoot.rsplit('/', 1)
+
+    if root_path != '.' and not os.path.exists(root_path):
+        os.makedirs(root_path)
+
+    if (not req.query) and (not req.queryPartition) and (not req.queryManipulation) and (req.multiFigs is True):
+        logger.error("ERROR: The multiFigs option is not available without query options.")
+        exit(1)
+
+    # this should be "string" due to the "nan" value, otherwise "nan"s will have different unique numbers
+    # TODO Can I just do a fillna on the df to get rid of nans?
+    sys_dtype = {'ConfidenceScore': str}
+
+    #TODO Do we use TSV files?
+    if req.tsv:
+        print("Place TSV metrics here ...")
+        DM_List, table_df = None, None
+        index_m_df = load_csv(os.path.join(req.refDir, req.inRef),
+                              mysep='\t', mydtype=sys_dtype)
+    else:
+        """
+        index_m_df: Pandas dataframe containing the reference index and the analytic system output
+        sys_ref_overlap: List of overlapping columns in the system output and reference datframes
+        input_ref_idx_sys:
+            - refDir:     Reference and index data path
+            - inRef:      Reference csv file that contains the ground-truth and metadata info [e.g., references/ref.csv]', metavar='character'
+            - inIndex:    CSV index file
+            - sysDir:     System output data path
+            - inSys:      CSV file of the system output (i.e. Analytic results)
+            - outRoot:    report path and the file name prefix for saving the plot(s) and table (s)
+            - outSubMeta: Boolean: Should the system save a csv file with the system output with minimal metadata?
+            - sys_dtype:  Data type of the system output (I think)
+        """
+        index_m_df, sys_ref_overlap = input_ref_idx_sys(req.refDir, req.inRef, req.inIndex, req.sysDir,
+                                                        req.inSys, req.outRoot, req.outSubMeta, sys_dtype)
+
+    # Total number of entries in the dataframe
+    total_num = index_m_df.shape[0]
+    logging.info("Total data number: {}".format(total_num))
+
+    sys_response = 'all'  # to distinguish use of the optout
+    query_mode = ""
+    tag_state = '_all'
+
+    if req.optOut:
+        """
+        Get truncated merged dataframe based on optout.
+        Does this just replace the dataframe returned from input_ref_idx_sys??
+        """
+        sys_response = 'tr'
+        index_m_df = is_optout(index_m_df, sys_response)
+
+
+
+    # Query Mode
+    elif req.query or req.queryPartition or req.queryManipulation:
+        if req.query:
+            query_mode = 'q'
+            query_str = req.query
+        elif req.queryPartition:
+            query_mode = 'qp'
+            query_str = req.queryPartition
+        elif req.queryManipulation:
+            query_mode = 'qm'
+            query_str = req.queryManipulation
+
+        tag_state = '_' + query_mode + '_query'
+
+        logging.info("Query_mode: {}, Query_str: {}".format(query_mode,query_str))
+        DM_List, table_df, selection = yes_query_mode(index_m_df, req.task, req.refDir, req.inRef, req.outRoot,
+                                                      req.optOut, req.outMeta, req.farStop, req.ci, req.ciLevel, req.dLevel, total_num, sys_response, query_str, query_mode, sys_ref_overlap)
+        # Render plots with the options
+        q_opts_list, q_plot_opts = plot_options(DM_List, req.configPlot, req.plotType,
+                                                req.plotTitle, req.plotSubtitle, req.optOut)
+        opts_list, plot_opts = query_plot_options(
+            DM_List, q_opts_list, q_plot_opts, selection, req.optOut, req.noNum)
+
+    # No Query mode
+    else:
+        #print(index_m_df.columns)
+        DM_List, table_df = no_query_mode(index_m_df, req.task, req.refDir, req.inRef, req.outRoot,
+                                          req.optOut, req.outMeta, req.farStop, req.ci, req.ciLevel, req.dLevel, total_num, sys_response)
+        # Render plots with the options
+        opts_list, plot_opts = plot_options(DM_List, req.configPlot, req.plotType,
+                                            req.plotTitle, req.plotSubtitle, req.optOut)
+
+    logging.info("Rendering/saving csv tables...\n")
+    if isinstance(table_df, list):
+        print("\nReport tables:\n")
+        for i, table in enumerate(table_df):
+            print("\nPartition {}:".format(i))
+            print(table)
+            table.to_csv(req.outRoot + tag_state + '_' + str(i) + '_report.csv', index=False, sep='|')
+    else:
+        print("Report table:\n{}".format(table_df))
+        table_df.to_csv(req.outRoot + tag_state + '_report.csv', index=False, sep='|')
+
+    if req.dump:
+        logging.info("Dumping metric objects ...\n")
+        for i, DM in enumerate(DM_List):
+            DM.write(root_path + '/' + file_suffix + '_query_' + str(i) + '.dm')
+
+    logging.info("Rendering/saving plots...\n")
+    # Creation of the object setRender (~DetMetricSet)
+    configRender = p.setRender(DM_List, opts_list, plot_opts)
+    # Creation of the Renderer
+    myRender = p.Render(configRender)
+    # Plotting
+    myfigure = myRender.plot_curve(
+        req.display, multi_fig=req.multiFigs, isOptOut=req.optOut, isNoNumber=req.noNum)
+
+    # save multiple figures if multi_fig == True
+    if isinstance(myfigure, list):
+        for i, fig in enumerate(myfigure):
+            fig.savefig(req.outRoot + tag_state + '_' + str(i)  + '_' + plot_opts['plot_type'] + '.pdf', bbox_inches='tight')
+    else:
+        myfigure.savefig(req.outRoot + tag_state + '_' + plot_opts['plot_type'] +'.pdf', bbox_inches='tight')

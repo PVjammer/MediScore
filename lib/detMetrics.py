@@ -10,47 +10,42 @@ import numpy as np
 
 class detMetrics:
     """Class representing a set of trials and containing:
-       - FNR array
-       - FPR array
-       - TPR array
-       - EER metric
-       - AUC metric
+       - FNR array      (False Negative Rate)
+       - FPR array      (Falst Positive Rate)
+       - TPR array      (True Positive Rate)
+       - EER metric     (Equal Error Rate)
+       - AUC metric     (Area Under the Curve)
        - Confidence Interval for AUC
     """
 
     def __init__(self, score, gt, fpr_stop=1, isCI=False, ciLevel=0.9, dLevel=0.0, total_num=1, sys_res='all'):
-        """Constructor"""
-#        s = time.time()
-#        print("sklearn: Computing points...")
-#        sys.stdout.flush()
+        """Constructor for detMetrics class.
+        Arguments:
+         - score:       1D pandas dateframe containing all the scores for a given system output
+         - gt:          1D pandas dataframe containing the ground truth values for each probe (Y/N strings for "IsTarget")
+         - fpr_stop:    the stop point of FAR for calculating partial AUC (boolean or multi-type bool and float?) (Typo?)
+         - isCI:        boolean that, if TRUE, will cause the lower and upper confidence interval to be calculated for AUC.  Hurts performace.
+         - ciLevel:     float value specifying what confidence level should be used for calculating the interval.
+         - dLevel:      the lower and upper exclusions for d-prime calculation
+         - total_num:   total number of probes in dataset (why do we need to pass this in??)
+         - sys_res:     sting specifying "tr" (for truncated) or "all" (for the whole dataset).  Used to spcify if optOut should be considered.
+        """
+
         self.fpr, self.tpr, self.fnr, self.thres, self.t_num, self.nt_num = Metrics.compute_points_sk(
             score, gt)
-        #print("count {}".format(score.shape))
-        # print("Total# ({}),  Target# ({}),  NonTarget# ({}) \n".format(
-        #     total_num, self.t_num, self.nt_num)) #total_num is the original total number
+
         print("Total# ({}),  Target# ({}),  NonTarget# ({}) \n".format(
              self.t_num+self.nt_num, self.t_num, self.nt_num))
         self.trr = round(float((self.t_num + self.nt_num)) / total_num, 2)
-        # print("T# {}, NT# {}, TRR: {}".format(self.t_num, self.nt_num, self.trr))
-#        print("({0:.1f}s)".format(time.time() - s))
-
-#        s = time.time()
-#        print("Manual: Computing points...")
-#        sys.stdout.flush()
-#        self.fpr2, self.tpr2, self.fnr2, self.thres2 = Metrics.compute_points_donotuse(score, gt)
-#        print("({0:.1f}s)".format(time.time() - s))
 
         self.eer = Metrics.compute_eer(self.fpr, self.fnr)
         self.auc = Metrics.compute_auc(self.fpr, self.tpr, 1.0)
         self.auc_at_fpr = Metrics.compute_auc(self.fpr, self.tpr, fpr_stop)
         self.d, self.dpoint, self.b, self.bpoint = Metrics.compute_dprime(
             self.fpr, self.tpr, dLevel)
-        #self.a, self.apoint = Metrics.compute_aprime(self.fpr, self.tpr)
 
         inter_point = Metrics.linear_interpolated_point(self.fpr, self.tpr, fpr_stop)
         self.tpr_at_fpr = inter_point[0][1]
-        #print ("fpr_stop test: {}".format(inter_point))
-        #print ("tpr_at_fpr: {}".format(self.tpr_at_fpr))
 
         self.ci_lower = 0
         self.ci_upper = 0
@@ -62,7 +57,6 @@ class detMetrics:
 
         self.fpr_stop = fpr_stop
         self.sys_res = sys_res
-#        detMetrics.dm_id += 1
 
     def __repr__(self):
         """Print from interpretor"""
@@ -88,7 +82,6 @@ class detMetrics:
         my_table = DataFrame(data, index=['0'])
 
         return my_table.round(6)
-        #my_table.to_csv(file_name, index = False)
 
     def get_eer(self):
         if self.eer == -1:
@@ -132,17 +125,10 @@ class Metrics:
         gt: ground-truth for given trials
         """
         from sklearn.metrics import roc_curve
-#        label = np.zeros(len(gt))
-#        #label =  np.where(gt=='Y', 1, 0)
-#        yes_mask = np.array(gt == 'Y')#TODO: error here
-#        label[yes_mask] = 1
-        # TODO:  Print the number of trials (target and non-target) here
 
         label = np.where(gt == 'Y', 1, 0)
         target_num = label[label == 1].size
         nontarget_num = label[label == 0].size
-        # print("Total# ({}),  Target# ({}),  NonTarget# ({}) \n".format(
-        #    label.size, target_num, nontarget_num))
 
         fpr, tpr, thres = roc_curve(label, score)
         fnr = 1 - tpr
@@ -179,22 +165,15 @@ class Metrics:
         lower_bound: lower bound percentile
         upper_bound: upper bound percentile"""
         from sklearn.metrics import roc_auc_score
-#        from sklearn.metrics import roc_curve
-#        score = score.astype(np.float64)
-#        mean = np.mean(score)
-#        size = len(score) - 1
-#        return abs(mean - st.t.interval(prob, size, loc=mean, scale=st.sem(score))[1])
 
         lower_bound = round((1.0 - float(ci_level)) / 2.0, 3)
         upper_bound = round((1.0 - lower_bound), 3)
         n_bootstraps = 500
         rng_seed = 77  # control reproducibility
         bootstrapped_auc = []
-#        bootstrapped_tpr = []
 
         rng = np.random.RandomState(rng_seed)
         indices = np.copy(score.index.values)
-        #print("Original indices {}".format(indices))
         for i in range(n_bootstraps):
             # bootstrap by sampling with replacement on the prediction indices
             new_indices = rng.choice(indices, len(indices))
@@ -203,24 +182,9 @@ class Metrics:
             auc = Metrics.compute_auc(fpr, tpr, fpr_stop)
             # print("Bootstrap #{} FPR_stop {}, AUC: {:0.3f}".format(i + 1, fpr_stop, auc))
 
-            #print("New indices {}".format(new_indices))
-            #label = np.where(gt[new_indices] == 'Y', 1, 0)
-            #print("New label {}".format(label))
-            # if np.unique(label).size < 2:
-            #print("Ignore: we need at least one positive and one negative sample for ROC AUC.")
-            #    continue
-
-            #auc = roc_auc_score(label, score[new_indices].values)
-
             bootstrapped_auc.append(auc)
-            # TODO: need pdf and ecdf distribution at each FPR
-            # see the paper: Nonparametic confidence intervals for receiver operating characteristic curves (2.4)
-            #fpr, tpr, thres = roc_curve(label[indices], score[indices])
-            # bootstrapped_tpr.append(tpr)
-            # print("Bootstrap #{} AUC: {:0.3f}".format(i + 1, auc))
 
         sorted_aucs = sorted(bootstrapped_auc)
-        #print("sorted AUCS {}".format(sorted_aucs))
 
         # Computing the lower and upper bound of the 90% confidence interval (default)
         # You can change the bounds percentiles to 0.025 and 0.975 to get
@@ -271,7 +235,6 @@ class Metrics:
                 mask.append(1)
             else:
                 mask.append(0)
-#        print("d_level- {} \ntpr- {} \nfpr- {} \nmask- {} \nd- {} \ndmax- {} \nidx- {} \n".format(d_level, fpr, tpr, mask, d, d_max, d_max_idx))
 
         if (d_max_idx == None):
             return None, (0, 0), None, (0, 0)
@@ -301,10 +264,6 @@ class Metrics:
 
         a_idx = a.index(max(a))
         a_max_point = (fpr[a_idx], tpr[a_idx])
-
-        #print("a- {} amax- {} idx- {} apoint- {}".format(a, max(a), a_idx, a_max_point))
-#        print("tpr{}".format(tpr))
-#        print("fpr{}".format(fpr))
 
         return max(a), a_max_point
 
@@ -365,7 +324,6 @@ class Metrics:
             # return a single set of tuples to maintain format
             return [(x0, y0)]
 
-    # TODO: optimize the speed (maybe vertorization?)
     @staticmethod
     def compute_points_donotuse(score, gt):  # do not match with R results
         """ computes false positive rate (FPR) and false negative rate (FNR)
@@ -393,12 +351,10 @@ class Metrics:
             fn[i] = np.logical_and(val < t[i], yes).sum()
             tp[i] = n_Y - fn[i]
             fp[i] = n_N - tn[i]
-    #    print("tp = {},\ntn = {},\nfp = {},\nfn = {}".format(tp,tn,fp,fn))
         # Compute true positive rate for current threshold
         tpr = tp / (tp + fn)
         # Compute false positive rate for current threshold
         fpr = fp / (fp + tn)
         # Compute false negative rate for current threshold.
         fnr = 1 - tpr     # fnr = 1 - tpr
-        # print("tpr = {}, fnr = {}\n".format(tpr[i],fpr[i]))
         return fpr, tpr, fnr, t

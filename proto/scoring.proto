@@ -11,15 +11,17 @@ enum TaskType{
 }
 
 message DatasetPaths{
-  string reference = 1;  // Path to the ground truth dataset
-  string index = 2;      // Path to the index file
+  string reference_dir = 1;  // Path to the ground truth dataset
+  string reference_gt = 2;
+  string index = 3;      // Path to the index file
 
 }
 
 message AnalyticOutput{
-  string results_file = 1;
-  bool optOut = 2;
-  string query = 3 ;     // I need to understand the query process and selective scoring better
+  string results_dir = 1;
+  string results_file = 2;
+  bool optout = 3;
+  string query = 4 ;     // I need to understand the query process and selective scoring better
 }
 
 message ScoringOptions{

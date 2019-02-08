@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package scoringproto;
+// import "google/rpc/status.proto";
+
+enum TaskType{
+  MANIPULATION = 0;
+  SPLICE = 1;
+  EVENT_VERIFICATION = 2;
+  CAMERA = 3;
+}
+
+message DatasetPaths{
+  string reference = 1;  // Path to the ground truth dataset
+  string index = 2;      // Path to the index file
+
+}
+
+message AnalyticOutput{
+  string results_file = 1;
+  bool optOut = 2;
+  string query = 3 ;     // I need to understand the query process and selective scoring better
+}
+
+message ScoringOptions{
+  float farstop = 1;
+  bool ci = 2;
+  float ciLevel = 3;
+  float dLevel = 4;
+}
+
+message DetectionScoreRequest{
+  TaskType task = 1;
+  DatasetPaths dataset = 2;
+  AnalyticOutput results = 3;
+  ScoringOptions options = 4;
+}
+
+message DetectionScore{
+  string output_dir = 1;
+}
+
+service Scoring {
+  rpc ScoreDetection(DetectionScoreRequest) returns (DetectionScore);
+}

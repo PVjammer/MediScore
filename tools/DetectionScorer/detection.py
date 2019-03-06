@@ -111,7 +111,7 @@ def JT_merge(ref_dir, ref_fname, mainDF):
         return mainDF
 
 
-def input_ref_idx_sys(refDir, inRef, inIndex, sysDir, inSys, outRoot, outSubMeta, sys_dtype):
+def input_ref_idx_sys(refDir, inRef, inIndex, sysPath, outRoot, outSubMeta, sys_dtype):
     """
     What do you do?
     """
@@ -123,8 +123,11 @@ def input_ref_idx_sys(refDir, inRef, inIndex, sysDir, inSys, outRoot, outSubMeta
     logging.info("Index file name: {}".format(os.path.join(refDir, inIndex)))
     myIndex = load_csv(os.path.join(refDir, inIndex))
     # Loading system output
-    logging.info("Sys file name: {}".format(os.path.join(sysDir, inSys)))
-    mySys = load_csv(os.path.join(sysDir, inSys), mydtype=sys_dtype)
+    logging.info("Sys file name: {}".format(os.path.join(sysPath)))
+    mySys = load_csv(os.path.join(sysPath), mydtype=sys_dtype)
+    print(mySys)
+    print("****")
+    print(myRef)
 
     # Identify which columns are shared between the reference csv and system output csv
     sys_ref_no_overlap, sys_ref_overlap = overlap_cols(mySys, myRef)
@@ -323,14 +326,13 @@ def score(req):
             - refDir:     Reference and index data path
             - inRef:      Reference csv file that contains the ground-truth and metadata info [e.g., references/ref.csv]', metavar='character'
             - inIndex:    CSV index file
-            - sysDir:     System output data path
-            - inSys:      CSV file of the system output (i.e. Analytic results)
+            - sysPath:      CSV file of the system output (i.e. Analytic results)
             - outRoot:    report path and the file name prefix for saving the plot(s) and table (s)
             - outSubMeta: Boolean: Should the system save a csv file with the system output with minimal metadata?
             - sys_dtype:  Data type of the system output (I think)
         """
-        index_m_df, sys_ref_overlap = input_ref_idx_sys(req.refDir, req.inRef, req.inIndex, req.sysDir,
-                                                        req.inSys, req.outRoot, req.outSubMeta, sys_dtype)
+        index_m_df, sys_ref_overlap = input_ref_idx_sys(req.refDir, req.inRef, req.inIndex, req.sysPath,
+                                                        req.outRoot, req.outSubMeta, sys_dtype)
 
     # Total number of entries in the dataframe
     total_num = index_m_df.shape[0]
@@ -387,11 +389,13 @@ def score(req):
         print("\nReport tables:\n")
         for i, table in enumerate(table_df):
             print("\nPartition {}:".format(i))
-            print(table)
+            print(table.columns)
+            print(table['AUC'])
             table.to_csv(req.outRoot + tag_state + '_' + str(i) + '_report.csv', index=False, sep='|')
     else:
         print("Report table:\n{}".format(table_df))
-        table_df.to_csv(req.outRoot + tag_state + '_report.csv', index=False, sep='|')
+        print(table_df.columns)
+        table_df.to_csv(req.outRoot + "/" + tag_state + '_report.csv', index=False, sep='|')
 
     if req.dump:
         logging.info("Dumping metric objects ...\n")
@@ -405,11 +409,13 @@ def score(req):
     myRender = p.Render(configRender)
     # Plotting
     myfigure = myRender.plot_curve(
-        req.display, multi_fig=req.multiFigs, isOptOut=req.optOut, isNoNumber=req.noNum)
-
+        req.display, multi_fig=req.multiFigs, isOptOut=req.optOut,
+        isNoNumber=req.noNum)
     # save multiple figures if multi_fig == True
     if isinstance(myfigure, list):
         for i, fig in enumerate(myfigure):
             fig.savefig(req.outRoot + tag_state + '_' + str(i)  + '_' + plot_opts['plot_type'] + '.pdf', bbox_inches='tight')
     else:
         myfigure.savefig(req.outRoot + tag_state + '_' + plot_opts['plot_type'] +'.pdf', bbox_inches='tight')
+
+    return table['AUC']

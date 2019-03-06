@@ -84,57 +84,61 @@ def get_status(data):
 
 def get_mdl(data):
     dict_list = []
-    csv_dict = OrderedDict()
     mask_list=[]
     for row in data:
-            # csv_dict["ProbeFileID"] = row['imgManipReq']["image"]["uri"].split("/")[-1].split(".")[0]
-            csv_dict["ProbeFileID"] = getID(row['imgManipReq']["image"]["uri"])
-            if 'imgManip' in row:
-                csv_dict["ConfidenceScore"] = row['imgManip']["score"]
+        csv_dict = OrderedDict()
+        # csv_dict["ProbeFileID"] = row['imgManipReq']["image"]["uri"].split("/")[-1].split(".")[0]
+        csv_dict["ProbeFileID"] = getID(row['imgManipReq']["image"]["uri"])
+        csv_dict["ConfidenceScore"] = 0.0
+        csv_dict["OutputProbeMaskFilename"] = ""
+        csv_dict["ProbeStatus"] = "NonProcessed"
+        csv_dict["ProbeOptOutPixelValue"] = ""
+
+        if 'imgManip' in row:
+            if 'score' in row['imgManip']: csv_dict["ConfidenceScore"] = row['imgManip']["score"]
+            if "localization" in row["imgManip"] and "mask" in row["imgManip"]["localization"]:
                 csv_dict["OutputProbeMaskFilename"] = get_mdl_mask_name(row)
-                csv_dict["ProbeStatus"] = get_status(row)
                 mask_list.append({"path":row["imgManip"]["localization"]["mask"]["uri"],"name":get_mdl_mask_name(row)})
-                csv_dict["ProbeOptOutPixelValue"] = ""
-
             else:
-                csv_dict["ConfidenceScore"] = 0.0
                 csv_dict["OutputProbeMaskFilename"] = ""
-                csv_dict["ProbeStatus"] = "NonProcessed"
-                csv_dict["ProbeOptOutPixelValue"] = ""
+            csv_dict["ProbeStatus"] = get_status(row)
+            csv_dict["ProbeOptOutPixelValue"] = ""
 
-            dict_list.append(csv_dict)
-    return dict_list, mask_list
+        # print(csv_dict["ConfidenceScore"])
+        dict_list.append(csv_dict)
+    return dict_list, mask_list, "manipulation"
 
 def get_sdl(data):
     dict_list = []
-    csv_dict = OrderedDict()
+
     mask_list=[]
     for row in data:
-            csv_dict["ProbeFileID"] = getID(row['imgSpliceReq']["probeImage"]["uri"])
-            csv_dict["DonorFileID"] = getID(row['imgSpliceReq']["donorImage"]["uri"])
-            if 'imgSplice' in row:
-                csv_dict["ConfidenceScore"] = row['imgSplice']["link"]["score"]
-                from_mask, to_mask = get_sdl_mask_names(row)
-                csv_dict["OutputProbeMaskFilename"] = to_mask
-                csv_dict["OutputDonorMaskFilename"] = from_mask
-                csv_dict["ProbeStatus"] = get_status(row)
-                csv_dict["DonorStatus"] = get_status(row)
-                # TODO Handle OptOut Mask
-                mask_list.append({"path":row["imgSplice"]["link"]["toMask"]["mask"]["uri"],"name":to_mask})
-                mask_list.append({"path":row["imgSplice"]["link"]["fromMask"]["mask"]["uri"],"name":from_mask})
-                csv_dict["ProbeOptOutPixelValue"] = ""
-                csv_dict["DonorOptOutPixelValue"] = ""
+        csv_dict = OrderedDict()
+        csv_dict["ProbeFileID"] = getID(row['imgSpliceReq']["probeImage"]["uri"])
+        csv_dict["DonorFileID"] = getID(row['imgSpliceReq']["donorImage"]["uri"])
+        if 'imgSplice' in row:
+            csv_dict["ConfidenceScore"] = row['imgSplice']["link"]["score"]
+            from_mask, to_mask = get_sdl_mask_names(row)
+            csv_dict["OutputProbeMaskFilename"] = to_mask
+            csv_dict["OutputDonorMaskFilename"] = from_mask
+            csv_dict["ProbeStatus"] = get_status(row)
+            csv_dict["DonorStatus"] = get_status(row)
+            # TODO Handle OptOut Mask
+            mask_list.append({"path":row["imgSplice"]["link"]["toMask"]["mask"]["uri"],"name":to_mask})
+            mask_list.append({"path":row["imgSplice"]["link"]["fromMask"]["mask"]["uri"],"name":from_mask})
+            csv_dict["ProbeOptOutPixelValue"] = ""
+            csv_dict["DonorOptOutPixelValue"] = ""
 
-            else:
-                csv_dict["ConfidenceScore"] = 0.0
-                csv_dict["OutputProbeMaskFilename"] = ""
-                csv_dict["OutputDonorMaskFilename"] = ""
-                csv_dict["ProbeStatus"] = "NonProcessed"
-                csv_dict["DonorStatus"] = "NonProcessed"
-                csv_dict["ProbeOptOutPixelValue"] = ""
-                csv_dict["DonorOptOutPixelValue"] = ""
+        else:
+            csv_dict["ConfidenceScore"] = 0.0
+            csv_dict["OutputProbeMaskFilename"] = ""
+            csv_dict["OutputDonorMaskFilename"] = ""
+            csv_dict["ProbeStatus"] = "NonProcessed"
+            csv_dict["DonorStatus"] = "NonProcessed"
+            csv_dict["ProbeOptOutPixelValue"] = ""
+            csv_dict["DonorOptOutPixelValue"] = ""
 
-            dict_list.append(csv_dict)
+        dict_list.append(csv_dict)
     return dict_list, mask_list
 
 def get_vdl(data):
@@ -182,9 +186,9 @@ def parse_json(filepath):
         # Make MDL CSV
         return  get_mdl(data)
     elif 'imgSplice'  in data[0]:
-        return get_sdl(data)
+        return get_sdl(data), data[0]
     elif 'vidManip' in data [0]:
-        return get_vdl(data)
+        return get_vdl(data), data[0]
     elif 'imgMeta':
         #TODO
         raise NotImplementedError()
@@ -198,7 +202,7 @@ def write_nist_csv(data, csv_path):
     try:
         keys = data[0].keys()
         with open(csv_path, 'w') as f:
-            dict_writer = csv.DictWriter(f, keys)
+            dict_writer = csv.DictWriter(f, keys, delimiter = "|")
             dict_writer.writeheader()
             dict_writer.writerows(data)
         return True
@@ -247,7 +251,7 @@ def remove_extension(filename):
 def main(args):
     # Get CSV and mask file info from JSON output
     outfile, ext = os.path.splitext(args.output)
-    results, masks = parse_json(args.file)
+    results, masks, type = parse_json(args.file)
     csv_path =  outfile+".csv"
 
     if write_nist_csv(results, csv_path):
@@ -256,7 +260,7 @@ def main(args):
             "masks": masks,
             "json": args.file
         }
-        print(data)
+
         make_tarfile(outfile, data)
     else: print("Oops!!!")
 

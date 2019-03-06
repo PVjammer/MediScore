@@ -8,6 +8,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -19,9 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='scoring.proto',
   package='scoringproto',
   syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n\rscoring.proto\x12\x0cscoringproto\"J\n\x0c\x44\x61tasetPaths\x12\x15\n\rreference_dir\x18\x01 \x01(\t\x12\x14\n\x0creference_gt\x18\x02 \x01(\t\x12\r\n\x05index\x18\x03 \x01(\t\"Z\n\x0e\x41nalyticOutput\x12\x13\n\x0bresults_dir\x18\x01 \x01(\t\x12\x14\n\x0cresults_file\x18\x02 \x01(\t\x12\x0e\n\x06optout\x18\x03 \x01(\x08\x12\r\n\x05query\x18\x04 \x01(\t\"N\n\x0eScoringOptions\x12\x0f\n\x07\x66\x61rstop\x18\x01 \x01(\x02\x12\n\n\x02\x63i\x18\x02 \x01(\x08\x12\x0f\n\x07\x63iLevel\x18\x03 \x01(\x02\x12\x0e\n\x06\x64Level\x18\x04 \x01(\x02\"\xc8\x01\n\x15\x44\x65tectionScoreRequest\x12$\n\x04task\x18\x01 \x01(\x0e\x32\x16.scoringproto.TaskType\x12+\n\x07\x64\x61taset\x18\x02 \x01(\x0b\x32\x1a.scoringproto.DatasetPaths\x12-\n\x07results\x18\x03 \x01(\x0b\x32\x1c.scoringproto.AnalyticOutput\x12-\n\x07options\x18\x04 \x01(\x0b\x32\x1c.scoringproto.ScoringOptions\"$\n\x0e\x44\x65tectionScore\x12\x12\n\noutput_dir\x18\x01 \x01(\t*L\n\x08TaskType\x12\x10\n\x0cMANIPULATION\x10\x00\x12\n\n\x06SPLICE\x10\x01\x12\x16\n\x12\x45VENT_VERIFICATION\x10\x02\x12\n\n\x06\x43\x41MERA\x10\x03\x32^\n\x07Scoring\x12S\n\x0eScoreDetection\x12#.scoringproto.DetectionScoreRequest\x1a\x1c.scoringproto.DetectionScoreb\x06proto3')
+  serialized_pb=_b('\n\rscoring.proto\x12\x0cscoringproto\"J\n\x0c\x44\x61tasetPaths\x12\x15\n\rreference_dir\x18\x01 \x01(\t\x12\x14\n\x0creference_gt\x18\x02 \x01(\t\x12\r\n\x05index\x18\x03 \x01(\t\"Z\n\x0e\x41nalyticOutput\x12\x13\n\x0bresults_dir\x18\x01 \x01(\t\x12\x14\n\x0cresults_file\x18\x02 \x01(\t\x12\x0e\n\x06optout\x18\x03 \x01(\x08\x12\r\n\x05query\x18\x04 \x01(\t\"N\n\x0eScoringOptions\x12\x0f\n\x07\x66\x61rstop\x18\x01 \x01(\x02\x12\n\n\x02\x63i\x18\x02 \x01(\x08\x12\x0f\n\x07\x63iLevel\x18\x03 \x01(\x02\x12\x0e\n\x06\x64Level\x18\x04 \x01(\x02\"\xc8\x01\n\x15\x44\x65tectionScoreRequest\x12$\n\x04task\x18\x01 \x01(\x0e\x32\x16.scoringproto.TaskType\x12+\n\x07\x64\x61taset\x18\x02 \x01(\x0b\x32\x1a.scoringproto.DatasetPaths\x12-\n\x07results\x18\x03 \x01(\x0b\x32\x1c.scoringproto.AnalyticOutput\x12-\n\x07options\x18\x04 \x01(\x0b\x32\x1c.scoringproto.ScoringOptions\"1\n\x0e\x44\x65tectionScore\x12\x12\n\noutput_dir\x18\x01 \x01(\t\x12\x0b\n\x03\x61uc\x18\x02 \x01(\x02*L\n\x08TaskType\x12\x10\n\x0cMANIPULATION\x10\x00\x12\n\n\x06SPLICE\x10\x01\x12\x16\n\x12\x45VENT_VERIFICATION\x10\x02\x12\n\n\x06\x43\x41MERA\x10\x03\x32^\n\x07Scoring\x12S\n\x0eScoreDetection\x12#.scoringproto.DetectionScoreRequest\x1a\x1c.scoringproto.DetectionScoreb\x06proto3')
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 _TASKTYPE = _descriptor.EnumDescriptor(
   name='TaskType',
@@ -31,25 +32,25 @@ _TASKTYPE = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='MANIPULATION', index=0, number=0,
-      serialized_options=None,
+      options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='SPLICE', index=1, number=1,
-      serialized_options=None,
+      options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='EVENT_VERIFICATION', index=2, number=2,
-      serialized_options=None,
+      options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='CAMERA', index=3, number=3,
-      serialized_options=None,
+      options=None,
       type=None),
   ],
   containing_type=None,
-  serialized_options=None,
-  serialized_start=520,
-  serialized_end=596,
+  options=None,
+  serialized_start=533,
+  serialized_end=609,
 )
 _sym_db.RegisterEnumDescriptor(_TASKTYPE)
 
@@ -74,28 +75,28 @@ _DATASETPATHS = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='reference_gt', full_name='scoringproto.DatasetPaths.reference_gt', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='index', full_name='scoringproto.DatasetPaths.index', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -119,35 +120,35 @@ _ANALYTICOUTPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='results_file', full_name='scoringproto.AnalyticOutput.results_file', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='optout', full_name='scoringproto.AnalyticOutput.optout', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='query', full_name='scoringproto.AnalyticOutput.query', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -171,35 +172,35 @@ _SCORINGOPTIONS = _descriptor.Descriptor(
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='ci', full_name='scoringproto.ScoringOptions.ci', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='ciLevel', full_name='scoringproto.ScoringOptions.ciLevel', index=2,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='dLevel', full_name='scoringproto.ScoringOptions.dLevel', index=3,
       number=4, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -223,35 +224,35 @@ _DETECTIONSCOREREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='dataset', full_name='scoringproto.DetectionScoreRequest.dataset', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='results', full_name='scoringproto.DetectionScoreRequest.results', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='options', full_name='scoringproto.DetectionScoreRequest.options', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -275,21 +276,28 @@ _DETECTIONSCORE = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='auc', full_name='scoringproto.DetectionScore.auc', index=1,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
   serialized_start=482,
-  serialized_end=518,
+  serialized_end=531,
 )
 
 _DETECTIONSCOREREQUEST.fields_by_name['task'].enum_type = _TASKTYPE
@@ -302,7 +310,6 @@ DESCRIPTOR.message_types_by_name['ScoringOptions'] = _SCORINGOPTIONS
 DESCRIPTOR.message_types_by_name['DetectionScoreRequest'] = _DETECTIONSCOREREQUEST
 DESCRIPTOR.message_types_by_name['DetectionScore'] = _DETECTIONSCORE
 DESCRIPTOR.enum_types_by_name['TaskType'] = _TASKTYPE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 DatasetPaths = _reflection.GeneratedProtocolMessageType('DatasetPaths', (_message.Message,), dict(
   DESCRIPTOR = _DATASETPATHS,
@@ -339,29 +346,5 @@ DetectionScore = _reflection.GeneratedProtocolMessageType('DetectionScore', (_me
   ))
 _sym_db.RegisterMessage(DetectionScore)
 
-
-
-_SCORING = _descriptor.ServiceDescriptor(
-  name='Scoring',
-  full_name='scoringproto.Scoring',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  serialized_start=598,
-  serialized_end=692,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='ScoreDetection',
-    full_name='scoringproto.Scoring.ScoreDetection',
-    index=0,
-    containing_service=None,
-    input_type=_DETECTIONSCOREREQUEST,
-    output_type=_DETECTIONSCORE,
-    serialized_options=None,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_SCORING)
-
-DESCRIPTOR.services_by_name['Scoring'] = _SCORING
 
 # @@protoc_insertion_point(module_scope)

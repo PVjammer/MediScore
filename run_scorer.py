@@ -1,9 +1,9 @@
-
+import logging
 import scoreservice
 import sys
 
 import scoring_pb2 as pb
-from tools.DetectionScorer.detection import *
+from tools.DetectionScorer.detection import score
 
 def score_detection(req, resp):
     class ArgsList():
@@ -14,7 +14,7 @@ def score_detection(req, resp):
             self.refDir = req.dataset.reference_dir
             self.inRef = req.dataset.reference_gt   #"NC2017-manipulation-ref.csv"
             self.inIndex = req.dataset.index        #"NC2017-manipulation-index.csv"
-            self.sysDir = req.results.results_dir   #"../../data/test_suite/detectionScorerTests/baseline"
+            self.sysPath = req.results.results_file   #"../../data/test_suite/detectionScorerTests/baseline"
             self.inSys = req.results.results_file   #"Base_NC2017_Manipulation_ImgOnly_p-copymove_01.csv"
             # TSV
             #self.tsv = "tsv_example/q-query-example.tsv"
@@ -25,7 +25,7 @@ def score_detection(req, resp):
             self.ciLevel = req.options.ciLevel      # 0.9
             self.dLevel = req.options.dLevel        # 0.0
             # Outputs
-            self.outRoot = "./testcase/test"
+            self.outRoot = "testcase/test"
             self.outMeta = False
             self.outSubMeta = False
             self.dump = False
@@ -34,7 +34,7 @@ def score_detection(req, resp):
             self.plotTitle = "Performance"
             self.plotSubtitle = "bla"
             self.plotType = "roc"
-            self.display = True
+            self.display = False
             self.multiFigs = False
             self.configPlot = ""
             self.noNum = False
@@ -48,7 +48,7 @@ def score_detection(req, resp):
 
     print("Running Function 'Score Detection'")
     args = ArgsList(req)
-    score(args)
+    resp.auc = score(args)
     resp.output_dir = args.outRoot
 
     logging.info("Done")

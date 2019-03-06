@@ -40,6 +40,7 @@ message DetectionScoreRequest{
 
 message DetectionScore{
   string output_dir = 1;
+  float auc = 2;
 }
 
 service Scoring {
